@@ -1,3 +1,12 @@
+class Tree {
+  String name;
+  double height;
+  Tree(this.name, this.height);
+  @override
+  String toString() {
+    return 'Tree: $name, Height: $height';
+  }
+}
 
 class Window {
   String type;
@@ -5,13 +14,20 @@ class Window {
   double height;
 
   Window(this.type, this.width, this.height);
+  @override
+  String toString() {
+    return 'Window: $type, Width: $width, Height: $height';
+  }
 }
 
 class Roof {
   String material;
   double area;
-
   Roof(this.material, this.area);
+  @override
+  String toString() {
+    return 'Roof: $material, Area: $area';
+  }
 }
 
 class Door {
@@ -20,39 +36,40 @@ class Door {
   double height;
 
   Door(this.material, this.width, this.height);
+  @override
+  String toString() {
+    return 'Door: $material, Width: $width, Height: $height';
+  }
 }
 
-class Tree {
-  String type;
-  double height;
-
-  Tree(this.type, this.height);
+class Items {
+  String name;
+  int quantity;
+  Items(this.name, this.quantity);
+  @override
+  String toString() {
+    return 'Item: $name, Quantity: $quantity';
+  }
 }
 
 class House {
   String address;
   String color;
-  List<Window> windows = [];  // by default empty
-  List<Roof> roofs = [];      // by default empty
-  List<Door> doors = [];      // by default empty
-  List<Tree> trees = [];      // by default empty
+  List<Window> windows = [];
+  List<Roof> roofs = [];
+  List<Door> doors = [];
+  List<Tree> trees = [];
+  List<Items> items = [];
 
-  House(this.address, this.color);
+  House(this.address, this.color, this.windows, this.roofs, this.doors, this.trees, this.items);
 
-  void addWindow(Window newWindow) {
-    this.windows.add(newWindow);
-  }
-
-  void addRoof(Roof newRoof) {
-    this.roofs.add(newRoof);
-  }
-
-  void addDoor(Door newDoor) {
-    this.doors.add(newDoor);
-  }
-
-  void addTree(Tree newTree) {
-    this.trees.add(newTree);
+  @override
+  String toString() {
+    return 'House: $address, Color: $color\n' +'Windows: $windows\n' +'Roofs: $roofs\n' +'Doors: $doors\n' +'Trees: $trees\n' +'Items: $items';
   }
 }
 
+void main() {
+  House myHouse = House('St k5', 'Blue', [Window('Glass', 10, 20)], [Roof('Metal', 100)], [Door('Wood', 10, 20)], [Tree('Mango', 10)], [Items('Chair', 10)]);
+  print(myHouse);
+}
