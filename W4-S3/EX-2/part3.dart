@@ -18,7 +18,7 @@ void main() => runApp(MaterialApp(
     ));
 
 class FavoriteCard extends StatefulWidget {
-  const FavoriteCard({Key? key, required this.isFavorite}) : super(key: key);
+  const FavoriteCard({super.key, required this.isFavorite});
 
   final bool isFavorite;
 

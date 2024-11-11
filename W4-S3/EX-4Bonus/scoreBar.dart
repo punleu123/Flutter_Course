@@ -31,17 +31,17 @@ class ScoreCard extends StatefulWidget {
 }
 
 class _ScoreCardState extends State<ScoreCard> {
-  double score = 0.0;
+  int score = 0;
 
   void _increaseScore() {
     setState(() {
-      if (score < 1.0) score += 0.1;
+      if (score < 10) score += 1;
     });
   }
 
   void _decreaseScore() {
     setState(() {
-      if (score > 0.0) score -= 0.1;
+      if (score > 0) score -= 1;
     });
   }
 
@@ -94,13 +94,13 @@ class _ScoreCardState extends State<ScoreCard> {
                       ),
                     ),
                     FractionallySizedBox(
-                      widthFactor: score,
+                      widthFactor: 0.1 * score,
                       child: Container(
                         height: 20,
                         decoration: BoxDecoration(
-                          color: score < 0.3
+                          color: score < 3
                               ? Colors.lightGreen
-                              : score < 0.7
+                              : score < 7
                                   ? Colors.green
                                   : Colors.green[900],
                           borderRadius: BorderRadius.circular(8),
