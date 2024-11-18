@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'data/profile_data.dart';
+import 'model/profile_tile_model.dart';
 
 void main() {
-  runApp(const MaterialApp(
+  runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: ProfileApp(),
+    home: ProfileApp(profile: punleuProfile),
   ));
 }
 
 const Color mainColor = Color(0xff5E9FCD);
 
 class ProfileApp extends StatelessWidget {
-  const ProfileApp({super.key});
+  final ProfileData profile;
+
+  const ProfileApp({super.key, required this.profile});
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +28,18 @@ class ProfileApp extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: const Center(
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             CircleAvatar(
               radius: 60,
-              backgroundImage: AssetImage(
-                  'assets/w5-s2/aang.png'), 
+              backgroundImage: AssetImage(profile.avatarUrl),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
-              'Ronan OGOR',
+              profile.name,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -44,23 +47,18 @@ class ProfileApp extends StatelessWidget {
               ),
             ),
             Text(
-              'Flutter Developer',
-              style: TextStyle(
+              profile.position,
+              style: const TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
               ),
             ),
-            SizedBox(height: 20),
-            ProfileTile(
-              icon: Icons.phone,
-              title: "Phone Number",
-              data: "+123 456 7890",
-            ),
-             ProfileTile(
-              icon: Icons.location_on,
-              title: "Address",
-              data: "Cambodia",
-            ),
+            const SizedBox(height: 20),
+            ...profile.tiles.map((tile) => ProfileTile(
+                  icon: tile.icon,
+                  title: tile.title,
+                  data: tile.value,
+                )),
           ],
         ),
       ),
