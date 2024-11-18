@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
+import 'jokes.dart';
 
 Color appColor = Colors.green[300] as Color;
 
-void main() => runApp(MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: appColor,
-          title: const Text("Favorite Jokes"),
-        ),
-        body: const Column(
-          children: [FavoriteCard(), FavoriteCard(), FavoriteCard()],
-        ),
-      ),
+void main() => runApp(const MaterialApp(
+      home: FavoriteCard(),
     ));
 
 class FavoriteCard extends StatefulWidget {
@@ -25,14 +17,45 @@ class FavoriteCard extends StatefulWidget {
 }
 
 class _FavoriteCardState extends State<FavoriteCard> {
-  bool _isFavorite = false;
-
-  void onFavoriteClick() {
+  List<Joke> jokes = jokesDatabase;
+  void _toggleFavorite(int index) {
     setState(() {
-      _isFavorite = !_isFavorite;
+      for (var joke in jokes) {
+        joke.isFavorite = false;
+      }
+
+      jokes[index].isFavorite = true;
     });
   }
- 
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: appColor,
+        title: const Text("Favorite Jokes"),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            ...jokes.map((joke) => Favorite(
+                  joke: joke,
+                  onFavoriteClick: () => _toggleFavorite(jokes.indexOf(joke)),
+                ))
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class Favorite extends StatelessWidget {
+  final VoidCallback onFavoriteClick;
+  final Joke joke;
+  const Favorite(
+      {super.key, required this.onFavoriteClick, required this.joke});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,26 +68,26 @@ class _FavoriteCardState extends State<FavoriteCard> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-           Expanded(
+          Expanded(
             flex: 7,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'title',
-                  style: TextStyle(
-                      color: appColor, fontWeight: FontWeight.w800),
+                  joke.title,
+                  style:
+                      TextStyle(color: appColor, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 10.0),
-                const Text('description')
+                Text(joke.description)
               ],
             ),
           ),
           IconButton(
               onPressed: onFavoriteClick,
               icon: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.red : Colors.grey,
+                joke.isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: joke.isFavorite ? Colors.red : Colors.grey,
               ))
         ],
       ),
