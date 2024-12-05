@@ -14,12 +14,20 @@ class ExpensesList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: ListView.builder(
-        itemCount: expenses.length,
-        itemBuilder: (context, index) => Dismissible(
-          onDismissed: (direction) => onExpenseRemoved(expenses[index]),
-            key: Key(expenses[index].id), child: ExpenseItem(expenses[index])),
-      ),
+      child: expenses.isEmpty
+          ? const Center(
+              child: Text(
+                'No expenses found. Start adding some!',
+              ),
+            )
+          : ListView.builder(
+              itemCount: expenses.length,
+              itemBuilder: (context, index) => Dismissible(
+                key: Key(expenses[index].id),
+                onDismissed: (direction) => onExpenseRemoved(expenses[index]),
+                child: ExpenseItem(expenses[index]),
+              ),
+            ),
     );
   }
 }

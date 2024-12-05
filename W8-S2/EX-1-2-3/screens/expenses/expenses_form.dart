@@ -14,6 +14,8 @@ class ExpenseForm extends StatefulWidget {
 class _ExpenseFormState extends State<ExpenseForm> {
   final _titleController = TextEditingController();
   final _valueController = TextEditingController();
+  Category? _selectedCategory;
+  DateTime? _selectedDate;
 
   String get title => _titleController.text;
 
@@ -32,68 +34,157 @@ class _ExpenseFormState extends State<ExpenseForm> {
   void onAdd() {
     // 1- Get the values from inputs
     String title = _titleController.text;
-    double amount = double.parse(_valueController.text);
+    double? amount = double.tryParse(_valueController.text);
 
-    // 2- Create the expense
-    Expense expense = Expense(
+    bool isTitleValid = title.trim().isNotEmpty;
+    bool isAmountValid = amount != null && amount > 0;
+    bool isSelectedCategory = _selectedCategory != null;
+    bool isSelectedDate = _selectedDate != null;
+    bool valid =
+        isTitleValid && isAmountValid && isSelectedCategory && isSelectedDate;
+
+    if (valid) {
+      // 2- Create the expense
+      Expense expense = Expense(
         title: title,
         amount: amount,
-        date: DateTime.now(), //  TODO :  For now it s a fake data
-        category: Category.food); //  TODO :  For now it s a fake data
+        date: _selectedDate!,
+        category: _selectedCategory!,
+      );
+      // 3- Ask the parent to add the expense
+      widget.onCreated(expense);
 
-    // 3- Ask the parent to add the expense
-    widget.onCreated(expense);
+      // 4- Close modal
+      Navigator.pop(context);
+    } else {
+      // Build error message
+      String errorMessage = '';
+      if (!isSelectedCategory) errorMessage = 'Please select a category.';
+      if (!isSelectedDate) errorMessage = 'Please select a date.';
+      if (!isAmountValid) errorMessage = 'Please enter the amount.';
+      if (!isTitleValid) errorMessage = 'The title cannot be empty.';
 
-    // 4- Close modal
-    Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (BuildContext content) {
+          return AlertDialog(
+            title: const Text("Invalid input"),
+            content: Text(errorMessage),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(content, "Okay"),
+                  child: const Text("Okay"))
+            ],
+          );
+        },
+      );
+    }
   }
 
+  void _pickDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
 
-  class DropdownButton extends StatelessWidget {
-  const DropdownButton({super.key, required this.onChanged, required this.value});
-
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextField(
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
-            ],
-            controller: _titleController,
-            maxLength: 50,
-            decoration: const InputDecoration(
-              label: Text('Title'),
-            ),
-          ),
-          TextField(
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            controller: _valueController,
-            maxLength: 50,
-            decoration: const InputDecoration(
-              prefix: Text('\$ '),
-              label: Text('Amount'),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(onPressed: onCancel, child: const Text('Cancel')),
-              const SizedBox(
-                width: 20,
+    return Container(
+      height: 500,
+      decoration: const BoxDecoration(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          color: Colors.white),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _titleController,
+              maxLength: 50,
+              decoration: const InputDecoration(
+                label: Text('Title'),
               ),
-              ElevatedButton(onPressed: onAdd, child: const Text('Create')),
-            ],
-          )
-        ],
+            ),
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  controller: _valueController,
+                  // maxLength: 50,
+                  decoration: const InputDecoration(
+                    prefix: Text('\$ '),
+                    label: Text('Amount'),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 30,
+              ),
+              Text(
+                _selectedDate != null
+                    ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                    : 'No date selected',
+                style: const TextStyle(fontSize: 16),
+              ),
+              IconButton(
+                icon: const Icon(Icons.calendar_month),
+                onPressed: _pickDate,
+              ),
+            ]),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              DropdownButton(
+                  value: _selectedCategory,
+                  hint: const Text("Category"),
+                  items: Category.values.map((Category category) {
+                    return DropdownMenuItem(
+                        value: category,
+                        child: Text(category.name.toUpperCase()));
+                  }).toList(),
+                  onChanged: (Category? value) {
+                    setState(() {
+                      _selectedCategory = value;
+                    });
+                  }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                      onPressed: onCancel,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        elevation: 0,
+                        side: const BorderSide(width: 0, color: Colors.white),
+                      ),
+                      child: const Text('Cancel')),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  ElevatedButton(
+                      onPressed: onAdd,
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[50]),
+                      child: const Text('Save Expense')),
+                ],
+              ),
+            ])
+          ],
+        ),
       ),
     );
   }
